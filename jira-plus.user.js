@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Jira Plus
-// @version      0.1.3
+// @version      0.1.4
 // @match        */secure/Tempo.jspa
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js
 // ==/UserScript==
@@ -103,7 +103,7 @@ function registerComponents(Vue) {
             let issueKey = '';
             try {
               if (isAdd) {
-                issueKey = ((worklogForm.querySelectorAll('.tuiForm__col')[0] || {}).textContent || '').split(':')[0]
+                issueKey = ((worklogForm.querySelectorAll('.tuiForm__col, span[name^="selected_issue"')[0] || {}).textContent || '').split(':')[0]
               } else {
                 issueKey = window.__reactGetInternalInstance(worklogForm.parentNode).memoizedProps.children.props.issue.key;
               }
