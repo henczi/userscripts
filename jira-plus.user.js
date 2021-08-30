@@ -1,11 +1,38 @@
 // ==UserScript==
 // @name         Jira Plus
-// @version      0.1.4
+// @version      0.2.0
 // @match        */secure/Tempo.jspa
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js
 // ==/UserScript==
 
 const vueRootId = 'jira-plus-plugin';
+
+// XHR response hook
+(function(open) {
+    XMLHttpRequest.prototype.open = function(method, url) {
+        if (method.toLowerCase() === 'post' && url === '/rest/tempo-timesheets/4/worklogs/search') {
+            this.addEventListener('load', function() {
+                var styleEl = document.getElementById('overide-tempo-style');
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.setAttribute('id', 'overide-tempo-style');
+                    document.head.appendChild(styleEl);
+                }
+                var responseJSON = JSON.parse(this.responseText);
+                if (responseJSON) {
+                    styleEl.innerHTML = responseJSON.map(x => {
+                        var rules = [];
+                        if (x.attributes?.['_Overtime_']?.value === 'true') rules.push('border: 2px solid red;');
+                        if (x.attributes?.['_On-site_']?.value === 'true') rules.push('background-color: #aaa;');
+                        return rules.length ? `#WORKLOG-${x.tempoWorklogId} { ${ rules.join(';') } }` : '';
+                    }).filter(Boolean).join('\n')
+                }
+            });
+        }
+        open.apply(this, arguments);
+    };
+})(XMLHttpRequest.prototype.open);
+
 
 function logInfo() {
   console.log("%cJira+ extension \n%cversion: " + GM_info.script.version, "font-size: 1.6rem; font-weight: bold;", "");
