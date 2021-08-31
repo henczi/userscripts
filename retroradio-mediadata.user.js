@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Retro radio mediadata
-// @version      0.1.2
+// @version      0.1.3
 // @match        http://stream1.retroradio.hu/mid.mp3*
 // @match        http://stream2.retroradio.hu/mid.mp3*
 // @match        http://stream3.retroradio.hu/mid.mp3*
 // @match        http://stream4.retroradio.hu/mid.mp3*
 // @match        http://stream5.retroradio.hu/mid.mp3*
 // @match        http://stream6.retroradio.hu/mid.mp3*
+// @downloadURL  https://github.com/henczi/userscripts/raw/master/retroradio-mediadata.user.js
 // ==/UserScript==
 
 (function() {

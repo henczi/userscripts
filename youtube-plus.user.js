@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         YouTubePlus
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.2.1
 // @match        https://www.youtube.com/*
 // @grant        none
+// @downloadURL  https://github.com/henczi/userscripts/raw/master/youtube-plus.user.js
 // ==/UserScript==
 
 (function() {

@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name         Jira Plus
-// @version      0.2.0
+// @version      0.2.1
 // @match        */secure/Tempo.jspa
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js
+// @downloadURL  https://github.com/henczi/userscripts/raw/master/jira-plus.user.js
 // ==/UserScript==
 
 const vueRootId = 'jira-plus-plugin';
