@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Jira Plus
-// @version      0.2.1
+// @version      0.3.0
 // @match        */secure/Tempo.jspa
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js
 // @downloadURL  https://github.com/henczi/userscripts/raw/master/jira-plus.user.js
@@ -77,6 +77,25 @@ function injectGlobalStyle() {
   document.head.appendChild(sheet);
 }
 
+function getIssueKeyFromCurrentWorklogForm() {
+    let issueKey;
+    const worklogForm = (document.querySelector('#worklogForm'));
+    if (worklogForm) {
+        const isAdd = !!worklogForm.querySelector('#issuePickerInput');
+        try {
+            if (isAdd) {
+                issueKey = ((worklogForm.querySelectorAll('.tuiForm__col, span[name^="selected_issue"')[0] || {}).textContent || '').split(':')[0]
+            } else {
+                issueKey = window.__reactGetInternalInstance(worklogForm.parentNode).memoizedProps.children.props.issue.key;
+            }
+        } catch (e) {
+            console.log("Error: get issueKey", e);
+        }
+
+    }
+    return issueKey;
+}
+
 function registerComponents(Vue) {
   Vue.component('tempo-worklog-viewer-dropdown', {
     template: `
@@ -125,22 +144,9 @@ function registerComponents(Vue) {
           this.$refs.container.style.top = `${rect.bottom}px`;
           this.$refs.container.style.left = `${rect.left}px`;
           this.$refs.container.style.width = `${(rect.right - rect.left)}px`;
-          const worklogForm = (document.querySelector('#worklogForm'));
-          if (worklogForm) {
-            const isAdd = !!worklogForm.querySelector('#issuePickerInput');
-            let issueKey = '';
-            try {
-              if (isAdd) {
-                issueKey = ((worklogForm.querySelectorAll('.tuiForm__col, span[name^="selected_issue"')[0] || {}).textContent || '').split(':')[0]
-              } else {
-                issueKey = window.__reactGetInternalInstance(worklogForm.parentNode).memoizedProps.children.props.issue.key;
-              }
-            } catch (e) {
-              console.log("Error: get issueKey", e);
-            }
-            if (issueKey) {
-              this.load(issueKey);
-            }
+          const issueKey = getIssueKeyFromCurrentWorklogForm();
+          if (issueKey) {
+            this.load(issueKey);
           }
         } else {
           this.hide();
@@ -157,6 +163,25 @@ function registerComponents(Vue) {
       window.addEventListener('blur', this.onBlur.bind(this), true);
     }
   });
+}
+
+function addAutoDescriptionHandler() {
+    // JIRA_PLUS_PERSONAL_AUTODESCRIPTION_MAP -- '{ "ISSUE-KEY": ["text1", "text2"] }'
+    var PERSONAL_AUTODESCRIPTION_MAP = JSON.parse(localStorage.getItem('JIRA_PLUS_PERSONAL_AUTODESCRIPTION_MAP')) ?? {};
+    window.addEventListener('click', function(event) {
+        if (event.target.name === 'submitWorklogButton') {
+            if (document.getElementById('comment').value === '') {
+                const issueKey = getIssueKeyFromCurrentWorklogForm();
+                if (issueKey) {
+                    const issueTexts = PERSONAL_AUTODESCRIPTION_MAP[issueKey];
+                    if (issueTexts) {
+                        const description = issueTexts.sort(() => 0.5 - Math.random()).slice(0, Math.random() * issueTexts.length).join(', ')
+                        window.__reactInputSetContent('#comment', description);
+                    }
+                }
+            }
+        }
+    }, true);
 }
 
 function main() {
@@ -186,5 +211,6 @@ function main() {
 (function () {
   'use strict';
   registerGlobalHelpers();
+  addAutoDescriptionHandler();
   window.onload = main;
 })();
