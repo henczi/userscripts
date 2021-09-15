@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Jira Plus
-// @version      0.3.0
+// @version      0.3.1
 // @match        */secure/Tempo.jspa
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js
 // @downloadURL  https://github.com/henczi/userscripts/raw/master/jira-plus.user.js
@@ -174,8 +174,12 @@ function addAutoDescriptionHandler() {
                 const issueKey = getIssueKeyFromCurrentWorklogForm();
                 if (issueKey) {
                     const issueTexts = PERSONAL_AUTODESCRIPTION_MAP[issueKey];
-                    if (issueTexts) {
-                        const description = issueTexts.sort(() => 0.5 - Math.random()).slice(0, Math.random() * issueTexts.length).join(', ')
+                    if (issueTexts && issueTexts.length) {
+                        const minCount = Math.floor(issueTexts.length / 2);
+                        const description = issueTexts
+                          .sort(() => 0.5 - Math.random())
+                          .slice(0, minCount + Math.random() * (issueTexts.length - minCount + 1))
+                          .join(', ')
                         window.__reactInputSetContent('#comment', description);
                     }
                 }
