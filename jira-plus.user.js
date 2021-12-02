@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Jira Plus
-// @version      0.3.1
+// @version      0.3.2
 // @match        */secure/Tempo.jspa
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.js
 // @downloadURL  https://github.com/henczi/userscripts/raw/master/jira-plus.user.js
@@ -120,7 +120,7 @@ function registerComponents(Vue) {
         if (!worklogId) { return; }
         const res = await fetch(`/rest/api/2/issue/${worklogId}/worklog`, { "credentials": "include", "headers": {}, "body": null, "method": "GET" })
           .then(x => x.json())
-          .then(x => x.worklogs.map(y => ({ comment: y.comment, timeSpent: y.timeSpent, authorName: y.author.displayName, date: y.started.split('T')[0] })).reverse())
+          .then(x => x.worklogs.map(y => ({ comment: y.comment, timeSpent: convertTimeSpent(y.timeSpentSeconds), authorName: y.author.displayName, date: y.started.split('T')[0] })).reverse())
         this.data = res.filter(x => x.comment.toLowerCase().indexOf('working on issue') < 0);
         if (this.data.length > 0) {
           this.show();
@@ -163,6 +163,17 @@ function registerComponents(Vue) {
       window.addEventListener('blur', this.onBlur.bind(this), true);
     }
   });
+}
+
+// 1d 2h 30m formátumban jöhet a timeSpent propertyben, de az 1d-t nem fogadja el logoláskor :(
+function convertTimeSpent(timeSpentSeconds) {
+    const hours = ~~(timeSpentSeconds / 3600);
+    const minutes = ~~((timeSpentSeconds - (hours * 3600)) / 60)
+
+    if (!minutes) {
+        return `${hours}h`;
+    }
+    return `${hours}h ${minutes}m`;
 }
 
 function addAutoDescriptionHandler() {
